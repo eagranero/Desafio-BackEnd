@@ -1,0 +1,1 @@
+[{"nombre":"Escuadra","precio":123.45,"tumbnail":"https://imagen.com/123456","id":1},{"nombre":"Calculadora","precio":123.45,"tumbnail":"https://imagen.com/123456","id":2},{"nombre":"Cuaderno","precio":123.45,"tumbnail":"https://imagen.com/123456","id":3},{"nombre":"Regla","precio":123.45,"tumbnail":"https://imagen.com/123456","id":4}]

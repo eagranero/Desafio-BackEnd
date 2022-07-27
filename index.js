@@ -1,4 +1,9 @@
 const  fs=require('fs')
+const  express=require('express')
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
 
 class Contenedor{
     constructor(nombre){
@@ -86,21 +91,35 @@ class Contenedor{
 const listadoProductos = new Contenedor("listado.txt");
 
 (async()=>{
-    await listadoProductos.save({nombre:"Escuadra1", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.save({nombre:"Escuadra2", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.save({nombre:"Escuadra3", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.save({nombre:"Escuadra4", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.deleteByID(1)
-    await listadoProductos.save({nombre:"Escuadra5", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.save({nombre:"Escuadra6", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.deleteByID(3)
-    await listadoProductos.getByID(5)
     await listadoProductos.deleteAll()
-    await listadoProductos.save({nombre:"Escuadra7", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.save({nombre:"Escuadra8", precio:123.45, tumbnail:"https://imagen.com/123456"})
-    await listadoProductos.deleteByID(2)
-    await listadoProductos.save({nombre:"Escuadra9", precio:123.45, tumbnail:"https://imagen.com/123456"})
+    await listadoProductos.save({nombre:"Escuadra", precio:123.45, tumbnail:"https://imagen.com/123456"})
+    await listadoProductos.save({nombre:"Calculadora", precio:123.45, tumbnail:"https://imagen.com/123456"})
+    await listadoProductos.save({nombre:"Cuaderno", precio:123.45, tumbnail:"https://imagen.com/123456"})
+    await listadoProductos.save({nombre:"Regla", precio:123.45, tumbnail:"https://imagen.com/123456"})
 })();
+
+
+const app = express()
+
+const PORT = 8080
+
+const server = app.listen(PORT,()=>{
+    console.log("Servidor Encendido")
+})
+
+server.on("error",(error)=>{console.log("Error en servidor")})
+
+app.get("/", (req,res)=>{
+    res.send({mensaje:"Curso de Back-End"});
+})
+
+app.get("/productos", (req,res)=>{
+    res.send(listadoProductos.listado);
+})
+
+app.get("/productoRandom", (req,res)=>{
+    res.send(listadoProductos.listado[getRandomInt(listadoProductos.listado.length)]);
+})
 
 
 
