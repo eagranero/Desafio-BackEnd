@@ -1,0 +1,23 @@
+{
+  "name": "desafio-backend",
+  "version": "1.0.0",
+  "description": "Desafios Curso de Back-End",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eagranero/Desafio-BackEnd.git"
+  },
+  "author": "Eduardo Granero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eagranero/Desafio-BackEnd/issues"
+  },
+  "homepage": "https://github.com/eagranero/Desafio-BackEnd#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "express-handlebars": "^6.0.6"
+  }
+}

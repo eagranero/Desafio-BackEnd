@@ -1,0 +1,15 @@
+html
+    head
+        title='Desafio Back-End - PUG - Eduardo Granero'
+        style
+            include styles.css
+    body
+        div(style="display:flex; flex-direction: column; align-items: center;") 
+            h1(style="margin-block:10px; font-size: 20px")="FORMULARIO DE INGRESO DE PRODUCTOS"
+            form(style="display:flex; flex-direction: column;width: 200px;",action="/api/productos",method="post")
+                input(style="margin-block: 5px;",type="text",id="nombre",name="nombre",value="",placeholder="Nombre")
+                input(style="margin-block: 5px;",type="text",id="precio",name="precio",value="",placeholder="Precio")
+                input(style="margin-block: 5px;",type="text",id="thumbnail",name="thumbnail",value="",placeholder="URL Imagen")
+                button(style="margin-block: 10px;",name="boton" type="submit" placeholder="Cargar")="CARGAR"
+            form(style="display:flex; flex-direction: column;width: 200px;",action="/api/productos",method="get")
+                button(name="boton",type="submit")="VER PRODUCTOS"
