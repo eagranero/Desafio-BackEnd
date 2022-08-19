@@ -117,14 +117,22 @@ const listadoProductos = new Contenedor("listado.txt");
     await listadoProductos.save({nombre:"Regla", precio:123.45, thumbnail:"../img/regla.jpg"})
 })();
 
+//Inicio Servidor Express
 const app = express();
 const router = express.Router();
+const { engine } = require('express-handlebars');
+
+
+const httpServer = require("http").createServer(app);
+const io = require("socket.io")(httpServer);
 const PORT = process.env.PORT || 8080
-const server = app.listen(PORT,()=>{
-  console.log("Servidor Encendido")
+
+
+httpServer.listen(PORT,()=>{
+    console.log("Servidor Encendido")
 })
 
-server.on("error",(error)=>{console.log("Error en servidor")})
+httpServer.on("error",(error)=>{console.log("Error en servidor")})
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
@@ -132,21 +140,62 @@ app.use(express.static('public'));
 
 app.use('/api/productos',router)
 
-app.set('view engine', 'ejs');
+app.set('view engine', 'hbs');
+app.set('views', './views');
+app.engine(
+    'hbs',
+    engine({
+        extname: '.hbs',
+        defaultLayout: 'index.hbs',
+        layoutsDir: __dirname + '/views/layouts',
+        partialsDir: __dirname + '/views/partials',
+    })
+);
 
 
+//Direccion para cargar el formulario
 app.get('/', (req, res) => {
-  res.render('pages/form', { title: 'FORMULARIO DE INGRESO DE PRODUCTOS', products: listadoProductos.listado });
+    res.render('body', { products: listadoProductos.listado, productsExist: true });
 });
 
-router.get('/', (req, res) => {
-  res.render('pages/productos', { title: 'LISTADO DE PRODUCTOS', products: listadoProductos.listado });
-});
 
+//Direccion para cargar y ver el producto cargado desde el formulario
 router.post('/', (req,res)=>{
-  const {body} = req;
-  (async()=>{
-      await listadoProductos.save(body) //agrego producto al archivo
-      res.render('pages/producto', {title: 'PRODUCTO INGRESADO',  products: listadoProductos.listado[listadoProductos.listado.length-1]});
-  })();  
+    const {body} = req;
+    (async()=>{
+        await listadoProductos.save(body) //agrego producto al archivo
+        res.render('producto', { products: listadoProductos.listado[listadoProductos.listado.length-1], productsExist: true });
+    })();  
 })
+
+
+//Direccion para ver todos los productos cargados
+router.get('/', (req,res)=>{
+    res.render('productos', { products: listadoProductos.listado, productsExist: true });    
+})
+
+let chat;
+try{chat = JSON.parse(fs.readFileSync("chat.txt",'utf-8') || "[]") || []}
+catch{chat=[]}
+
+
+io.on("connection", (socket) => {
+    io.sockets.emit("listadoProductos", listadoProductos.listado);
+    
+    chat.push({mail:"",tiempo:"",msg: "Se unio al chat " + socket.id});
+    io.sockets.emit("listadoChat", chat);
+
+    socket.on("msg-chat", (data) => {
+    chat.push(data);
+    io.sockets.emit("listadoChat", chat);
+    fs.writeFileSync("chat.txt",JSON.stringify(chat))
+  });
+
+socket.on("nuevoProducto", (data) => {
+    console.log(data);
+    (async()=>{
+        await listadoProductos.save(data) //agrego producto al archivo
+        io.sockets.emit("listadoProductos", listadoProductos.listado);
+    })();  
+  });
+});

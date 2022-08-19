@@ -1,4 +1,2 @@
 # dependencies
-/ejs/node_modules
-/pug/node_modules
-/Handlebars/node_modules
+/node_modules
