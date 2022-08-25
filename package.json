@@ -1,24 +1,33 @@
 {
   "name": "desafio-backend",
   "version": "1.0.0",
-  "description": "Desafios Curso de Back-End",
-  "main": "index.js",
+  "description": "",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack",
+    "start": "node ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eagranero/Desafio-BackEnd.git"
   },
-  "author": "Eduardo Granero",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/eagranero/Desafio-BackEnd/issues"
   },
   "homepage": "https://github.com/eagranero/Desafio-BackEnd#readme",
+  "devDependencies": {
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-node-externals": "^3.0.0"
+  },
   "dependencies": {
+    "@types/express": "^4.17.13",
     "express": "^4.18.1",
-    "express-handlebars": "^6.0.6",
     "socket.io": "^4.5.1"
   }
 }

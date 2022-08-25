@@ -1,1 +1,1 @@
-[{"nombre":"Escuadra","precio":123.45,"thumbnail":"../img/escuadra.jpg","id":1},{"nombre":"Calculadora","precio":123.45,"thumbnail":"../img/calculadora.jpg","id":2},{"nombre":"Cuaderno","precio":123.45,"thumbnail":"../img/cuaderno.jpg","id":3},{"nombre":"Regla","precio":123.45,"thumbnail":"../img/regla.jpg","id":4}]
+[{"nombre":"Producto 1","precio":100,"thumbnail":"www.1.com","id":1},{"nombre":"Producto 2","precio":100,"thumbnail":"www.2.com","id":2},{"nombre":"Producto 4","precio":100,"thumbnail":"www.4.com","id":4}]
