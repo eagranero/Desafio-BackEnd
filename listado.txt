@@ -1,1 +1,0 @@
-[{"nombre":"Producto 1","precio":100,"thumbnail":"www.1.com","id":1},{"nombre":"Producto 2","precio":100,"thumbnail":"www.2.com","id":2},{"nombre":"Producto 4","precio":100,"thumbnail":"www.4.com","id":4}]
