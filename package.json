@@ -1,7 +1,6 @@
 {
   "name": "desafio-backend",
   "version": "1.0.0",
-
   "description": "Desafios Curso de Back-End",
   "main": "index.js",
   "type": "module",
@@ -21,6 +20,7 @@
   },
   "homepage": "https://github.com/eagranero/Desafio-BackEnd#readme",
   "devDependencies": {
+    "@faker-js/faker": "^7.5.0",
     "ts-loader": "^9.3.1",
     "typescript": "^4.7.4",
     "webpack": "^5.74.0",
@@ -33,6 +33,7 @@
     "express-handlebars": "^6.0.6",
     "knex": "^2.3.0",
     "mysql": "^2.18.1",
+    "normalizr": "^3.6.2",
     "socket.io": "^4.5.1",
     "sqlite3": "^5.0.11"
   }

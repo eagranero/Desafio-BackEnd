@@ -7,16 +7,31 @@ import {engine} from "express-handlebars"
 import {options as MDB}  from "./options/optionsMDB.js"
 import {options as SQLite}  from "./options/optionsSQLite.js"
 
+import { generarProducto } from './utils/generadorProductos.js';
+import Contenedor_FS from "./fs/Contenedor_FS.js"
+import { schema, normalize } from 'normalizr';
+import util from 'util'
+
+
 // Creo las DB de Productos y Chat
 const listadoProductos =  new DB("Productos",MDB);
 listadoProductos.crearDBProductos();
-const listadoChat =  new DB("Chat",SQLite);
-listadoChat.crearDBChat();
+//const listadoChat =  new DB("Chat",SQLite);
+//listadoChat.crearDBChat();
+const listadoChat= new Contenedor_FS("chat")
 
 //Cargo 3 productos de prueba
-listadoProductos.save_Knex({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
-listadoProductos.save_Knex({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"});
-listadoProductos.save_Knex({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"});
+const asincronica=(async()=>{
+    await listadoProductos.deleteAll()
+    //await listadoChat.deleteAll()
+    await listadoProductos.save_Knex({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
+    await listadoProductos.save_Knex({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"});
+    await listadoProductos.save_Knex({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"});
+})()
+
+
+
+
 
 
 //Inicio Servidor Express
@@ -51,7 +66,16 @@ app.engine(
     })
 );
 
+let listadoProductosTest=[]
 
+const routerProductostest = express.Router()
+app.use('/api/productos-test',routerProductostest);
+
+routerProductostest.get('/', async (req, res) => {
+    listadoProductosTest=[]
+    for(let i=0;i<5;++i)listadoProductosTest.push(generarProducto())
+    res.render('productos-test')
+});
 
 
 //Direccion para cargar la pagina principal
@@ -72,28 +96,42 @@ app.get('/borrarChat', async (req, res) => {
 });
 
 
-let chat;
+
+const authorSchema = new schema.Entity("authors", {},{idAttribute:'mail'})
+const schemaMensaje = new schema.Entity("post", {author:authorSchema},{idAttribute:'id'})
+const schemaPosteos = new schema.Entity('posts', { mensajes: [schemaMensaje] }, { idAttribute: 'id' })
+
+let chat=[],chatNorm={};
+let chat_a_normalizar={id:"chat",mensajes:[]};
 
 io.on("connection", async (socket) => {
 
-    chat = await listadoChat.getAll_Knex();
-    
-    
-    io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
-    let nuevaConexion={mail:"",tiempo:"",msg: "Se unio al chat " + socket.id}
-    chat.push(nuevaConexion);
-    listadoChat.save_Knex(nuevaConexion);
-    io.sockets.emit("listadoChat", chat);
+    chat = await listadoChat.getAll();
 
-    socket.on("msg-chat", (data) => {
-    chat.push(data);
-    io.sockets.emit("listadoChat", chat);
-    listadoChat.save_Knex(data);
-  });
-
-socket.on("nuevoProducto",async (data) => {
-    console.log(data);
-    await listadoProductos.save_Knex(data) //agrego producto al archivo
+    let date = new Date();
+    io.sockets.emit("listadoProductos-test", listadoProductosTest );
     io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
-  });
+    const tiempo = "["+date.toLocaleDateString() + " - " + date.toLocaleTimeString()+"]";
+    let nuevaConexion={author:{mail:"Nuevo",tiempo:tiempo,nombre:"",apellido:"",edad:"",alias:"",avatar:""},text: "Se unio al chat " + socket.id}
+    chat.push(nuevaConexion)
+    listadoChat.save(nuevaConexion);
+
+    chat_a_normalizar.mensajes=JSON.parse(JSON.stringify(chat))
+    chatNorm=normalize(chat_a_normalizar,schemaPosteos)
+    
+    io.sockets.emit("listadoChat", chatNorm);
+
+    socket.on("msg-chat", async (data) => {
+        listadoChat.save(data);
+        chat = await listadoChat.getAll();
+        chat_a_normalizar.mensajes=JSON.parse(JSON.stringify(chat))
+        chatNorm=normalize(chat_a_normalizar,schemaPosteos)  
+        io.sockets.emit("listadoChat", chatNorm);
+    });
+
+    socket.on("nuevoProducto",async (data) => {
+        console.log(data);
+        await listadoProductos.save_Knex(data) //agrego producto al archivo
+        io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
+    });
 });

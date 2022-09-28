@@ -1,9 +1,14 @@
 <div style="padding-block: 30px; display:flex; flex-direction:column; align-items: center " >
     <h1  style="margin-block:10px; font-size: 20px; text-align:center">SALA DE CHAT</h1>
-    <form onsubmit="return enviar()">
+    <form style="display:flex; flex-direction:column" onsubmit="return enviar()">
         <input id="caja-mail" type="text" placeholder="E-mail"/>
-        <input id="caja-msg" type="text"/>
-        <input type="submit" value="Enviar" />
+        <input id="caja-nombre" type="text" placeholder="Nombre"/>
+        <input id="caja-apellido" type="text" placeholder="Apellido"/>
+        <input id="caja-edad" type="text" placeholder="Edad"/>
+        <input id="caja-alias" type="text" placeholder="Alias"/>
+        <input id="caja-avatar" type="text" placeholder="Avatar"/>
+        <input id="caja-msg" type="text" placeholder="Mensaje"/>
+        <input type="submit" value="Enviar"/>
     </form>
     <div id="div-chats"></div>
 </div>

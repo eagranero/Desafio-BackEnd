@@ -1,0 +1,1 @@
+[{"author":{"mail":"Nuevo","tiempo":"[27/9/2022 - 22:51:40]","nombre":"","apellido":"","edad":"","alias":"","avatar":""},"text":"Se unio al chat FGLMA577Jnq2SWwJAAAF","id":1}]
