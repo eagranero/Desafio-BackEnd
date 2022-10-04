@@ -1,27 +1,19 @@
-import  fs  from 'fs'
-import DB from "./DB.js";
 import express from "express";
 import { createServer, get } from "http";
 import { Server } from "socket.io";
 import {engine} from "express-handlebars"
-import {options as MDB}  from "./options/optionsMDB.js"
-import {options as SQLite}  from "./options/optionsSQLite.js"
+import { routerProductos,listadoProductos } from "./routers/productos.js";
+import { routerProductostest } from "./routers/productos-test.js";
+import {socket} from "./socket.js"
+import session from "express-session"
+import MongoStore from "connect-mongo";
+import { routerLogin } from "./routers/login.js";
 
-import { generarProducto } from './utils/generadorProductos.js';
-import Contenedor_FS from "./fs/Contenedor_FS.js"
-import { schema, normalize } from 'normalizr';
-import util from 'util'
 
-
-// Creo las DB de Productos y Chat
-const listadoProductos =  new DB("Productos",MDB);
-listadoProductos.crearDBProductos();
-//const listadoChat =  new DB("Chat",SQLite);
-//listadoChat.crearDBChat();
-const listadoChat= new Contenedor_FS("chat")
 
 //Cargo 3 productos de prueba
 const asincronica=(async()=>{
+    listadoProductos.crearDBProductos();
     await listadoProductos.deleteAll()
     //await listadoChat.deleteAll()
     await listadoProductos.save_Knex({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
@@ -31,13 +23,8 @@ const asincronica=(async()=>{
 
 
 
-
-
-
 //Inicio Servidor Express
 const app = express();
-const router = express.Router();
-
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 const PORT = process.env.PORT || 8080
@@ -51,9 +38,6 @@ httpServer.on("error",(error)=>{console.log("Error en servidor")})
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
-
-app.use('/api/productos',router)
-
 app.set('view engine', 'hbs');
 app.set('views', './views');
 app.engine(
@@ -66,72 +50,37 @@ app.engine(
     })
 );
 
-let listadoProductosTest=[]
 
-const routerProductostest = express.Router()
+app.use(
+    session({
+      store: MongoStore.create({
+        mongoUrl: "mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net",
+        mongoOptions: {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        },
+      }),
+  
+      secret: "el secreto",
+      cookie: {maxAge: 5000},
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
+
+  app.use(function(req,res,next){
+    req.session._garbage = Date();
+    req.session.touch();
+    next()
+  })
+
+app.use('/api/productos',routerProductos);
 app.use('/api/productos-test',routerProductostest);
+app.use('/login',routerLogin);
 
-routerProductostest.get('/', async (req, res) => {
-    listadoProductosTest=[]
-    for(let i=0;i<5;++i)listadoProductosTest.push(generarProducto())
-    res.render('productos-test')
-});
-
-
-//Direccion para cargar la pagina principal
 app.get('/', async (req, res) => {
-    res.render('body');
+  if (req.session.user) res.redirect("/login")
+  else res.redirect("/login")
 });
 
-//Direccion para borrar todos los productos de la base de datos
-app.get('/borrarproductos', async (req, res) => {
-    await listadoProductos.deleteAll()
-    res.render('body');
-});
-
-//Direccion para borrar todos los productos de la base de datos
-app.get('/borrarChat', async (req, res) => {
-    await listadoChat.deleteAll()
-    res.render('body');
-});
-
-
-
-const authorSchema = new schema.Entity("authors", {},{idAttribute:'mail'})
-const schemaMensaje = new schema.Entity("post", {author:authorSchema},{idAttribute:'id'})
-const schemaPosteos = new schema.Entity('posts', { mensajes: [schemaMensaje] }, { idAttribute: 'id' })
-
-let chat=[],chatNorm={};
-let chat_a_normalizar={id:"chat",mensajes:[]};
-
-io.on("connection", async (socket) => {
-
-    chat = await listadoChat.getAll();
-
-    let date = new Date();
-    io.sockets.emit("listadoProductos-test", listadoProductosTest );
-    io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
-    const tiempo = "["+date.toLocaleDateString() + " - " + date.toLocaleTimeString()+"]";
-    let nuevaConexion={author:{mail:"Nuevo",tiempo:tiempo,nombre:"",apellido:"",edad:"",alias:"",avatar:""},text: "Se unio al chat " + socket.id}
-    chat.push(nuevaConexion)
-    listadoChat.save(nuevaConexion);
-
-    chat_a_normalizar.mensajes=JSON.parse(JSON.stringify(chat))
-    chatNorm=normalize(chat_a_normalizar,schemaPosteos)
-    
-    io.sockets.emit("listadoChat", chatNorm);
-
-    socket.on("msg-chat", async (data) => {
-        listadoChat.save(data);
-        chat = await listadoChat.getAll();
-        chat_a_normalizar.mensajes=JSON.parse(JSON.stringify(chat))
-        chatNorm=normalize(chat_a_normalizar,schemaPosteos)  
-        io.sockets.emit("listadoChat", chatNorm);
-    });
-
-    socket.on("nuevoProducto",async (data) => {
-        console.log(data);
-        await listadoProductos.save_Knex(data) //agrego producto al archivo
-        io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
-    });
-});
+socket(io)
