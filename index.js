@@ -8,8 +8,7 @@ import {socket} from "./socket.js"
 import session from "express-session"
 import MongoStore from "connect-mongo";
 import { routerLogin } from "./routers/login.js";
-
-
+import passport from "passport";
 
 //Cargo 3 productos de prueba
 const asincronica=(async()=>{
@@ -23,20 +22,25 @@ const asincronica=(async()=>{
 
 
 
+
 //Inicio Servidor Express
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
-const PORT = process.env.PORT || 8080
+app.use(
+  session({
+    store: MongoStore.create({
+      mongoUrl: "mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net",
+      mongoOptions: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
+    }),
 
-httpServer.listen(PORT,()=>{
-    console.log("Servidor Encendido")
-})
-
-httpServer.on("error",(error)=>{console.log("Error en servidor")})
-
-app.use(express.json())
-app.use(express.urlencoded({extended:true}));
+    secret: "el secreto",
+    cookie: {maxAge: 10000},
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(express.static('public'));
 app.set('view engine', 'hbs');
 app.set('views', './views');
@@ -51,28 +55,28 @@ app.engine(
 );
 
 
-app.use(
-    session({
-      store: MongoStore.create({
-        mongoUrl: "mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net",
-        mongoOptions: {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        },
-      }),
-  
-      secret: "el secreto",
-      cookie: {maxAge: 5000},
-      resave: false,
-      saveUninitialized: false,
-    })
-  );
+app.use(passport.initialize());
+app.use(passport.session());
 
-  app.use(function(req,res,next){
-    req.session._garbage = Date();
-    req.session.touch();
-    next()
-  })
+app.use(express.json())
+app.use(express.urlencoded({extended:true}));
+
+
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+const PORT = process.env.PORT || 8080
+
+httpServer.listen(PORT,()=>{
+    console.log("Servidor Encendido")
+})
+
+httpServer.on("error",(error)=>{console.log("Error en servidor")})
+
+app.use(function(req,res,next){
+  req.session._garbage = Date();
+  req.session.touch();
+  next()
+})
 
 app.use('/api/productos',routerProductos);
 app.use('/api/productos-test',routerProductostest);

@@ -26,7 +26,7 @@ socket.on("listadoChat", (data) => {
   let mensajesNsize = JSON.stringify(data).length
   let mensajesDsize = JSON.stringify(data_desnormalizada).length
   let compresion=parseInt((mensajesNsize * 100) / mensajesDsize)
-  document.getElementById("h1-compresion").innerHTML = `Compresion del chat: ${compresion}`;
+  if(document.getElementById("h1-compresion")!=null)document.getElementById("h1-compresion").innerHTML = `Compresion del chat: ${compresion}`;
 
  });
 

@@ -8,19 +8,8 @@ export const listadoProductos =  new DB("Productos",MDB);
 export const listadoChat= new Contenedor_FS("chat")
 export const routerProductos = express.Router()
 
-
-
-function checkAuthentication(req, res, next) {
-    if (req.isAuthenticated()) {
-      next();
-    } else {
-      res.redirect("/login");
-    }
-  }
-  
-
 //Direccion para cargar la pagina principal
-routerProductos.get('/',checkAuthentication, async (req, res) => {
+routerProductos.get('/', async (req, res) => {
     let login=null;
     if (req.session.user) {
         login=req.session.user
@@ -29,13 +18,13 @@ routerProductos.get('/',checkAuthentication, async (req, res) => {
 });
 
 //Direccion para borrar todos los productos de la base de datos
-routerProductos.get('/borrarproductos',checkAuthentication, async (req, res) => {
+routerProductos.get('/borrarproductos', async (req, res) => {
     await listadoProductos.deleteAll()
     res.redirect("/api/productos")
 });
 
 //Direccion para borrar todos los productos de la base de datos
-routerProductos.get('/borrarChat',checkAuthentication, async (req, res) => {
+routerProductos.get('/borrarChat', async (req, res) => {
     await listadoChat.deleteAll()
     res.redirect("/api/productos")
 });

@@ -2,13 +2,13 @@
     {{> encabezado}}
     <div>
         <div style="padding-block: 30px; display:flex; flex-direction: column; align-items: center;border-color:red; border-bottom:solid">
-            <h1 style="margin-block:10px; font-size: 20px; ">FORMULARIO DE LOGIN</h1>
-            <form style="display:flex; flex-direction: column;width: 200px;" method="post" action="/login">
+            <h1 style="margin-block:10px; font-size: 20px; ">FORMULARIO DE REGISTRO</h1>
+            <form style="display:flex; flex-direction: column;width: 200px;" method="post" action="/login/signup">
                 <input style="margin-block: 5px;"  type="text" id="username" name="username" value=""  placeholder="Username"/>
                 <input style="margin-block: 5px;" type="text" id="password" name="password" value="" placeholder="Password"/>
-                <button style="margin-block: 10px;" name="boton" type="submit" placeholder="Cargar">Ingresar</button>
+                <button style="margin-block: 10px;" name="boton" type="submit" placeholder="Sign Up">Sign Up</button>
             </form>
-             <form action="login/signup"><button style="margin-block: 10px;" name="boton" type="submit" placeholder="Ir a Registro">Resgistrarse</button></form>
+            <form action="/login"><button style="margin-block: 10px;" name="boton" type="submit" placeholder="Ir a Login">Login</button></form>
         </div>
     </div>
 </div>
