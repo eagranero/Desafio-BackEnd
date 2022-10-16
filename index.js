@@ -9,6 +9,18 @@ import session from "express-session"
 import MongoStore from "connect-mongo";
 import { routerLogin } from "./routers/login.js";
 import passport from "passport";
+import dotenv from 'dotenv'
+import Yargs from "yargs";
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { randoms } from "./routers/randoms.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+
+
+dotenv.config()
 
 //Cargo 3 productos de prueba
 const asincronica=(async()=>{
@@ -28,14 +40,14 @@ const app = express();
 app.use(
   session({
     store: MongoStore.create({
-      mongoUrl: "mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net",
+      mongoUrl: process.env.DATABASE_CONNECTION_STRING,
       mongoOptions: {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       },
     }),
 
-    secret: "el secreto",
+    secret: process.env.SECRET_MONGO,
     cookie: {maxAge: 10000},
     resave: false,
     saveUninitialized: false,
@@ -64,10 +76,12 @@ app.use(express.urlencoded({extended:true}));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer);
-const PORT = process.env.PORT || 8080
+//const PORT = process.env.PORT || 8080
+const args = Yargs(process.argv.slice(2)).default({port:8080}).argv
+const PORT=args.port;
 
 httpServer.listen(PORT,()=>{
-    console.log("Servidor Encendido")
+    console.log("Servidor Encendido en puerto "+ PORT)
 })
 
 httpServer.on("error",(error)=>{console.log("Error en servidor")})
@@ -80,11 +94,27 @@ app.use(function(req,res,next){
 
 app.use('/api/productos',routerProductos);
 app.use('/api/productos-test',routerProductostest);
+app.use('/api/randoms',randoms);
 app.use('/login',routerLogin);
 
 app.get('/', async (req, res) => {
   if (req.session.user) res.redirect("/login")
   else res.redirect("/login")
 });
+
+
+
+app.get("/info",(req,res)=>{
+  res.json({
+    Argumentos:args,
+    Plataforma:process.platform,
+    ID:process.pid, 
+    Version: process.version,
+    Memoria:process.memoryUsage(),
+    Path:process.execPath,
+    Carpeta:process.cwd()
+  })
+})
+
 
 socket(io)
