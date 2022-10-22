@@ -11,32 +11,34 @@ import { routerLogin } from "./routers/login.js";
 import passport from "passport";
 import dotenv from 'dotenv'
 import Yargs from "yargs";
-
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { randoms } from "./routers/randoms.js";
 
+
+import cluster from "cluster";
+import numCPUs from "os"
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-
 
 dotenv.config()
 
 //Cargo 3 productos de prueba
-const asincronica=(async()=>{
+/*const asincronica=(async()=>{
     listadoProductos.crearDBProductos();
     await listadoProductos.deleteAll()
     //await listadoChat.deleteAll()
     await listadoProductos.save_Knex({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
     await listadoProductos.save_Knex({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"});
     await listadoProductos.save_Knex({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"});
-})()
+})()*/
 
 
 
 
 //Inicio Servidor Express
 const app = express();
+
 app.use(
   session({
     store: MongoStore.create({
@@ -69,7 +71,6 @@ app.engine(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
 
@@ -77,14 +78,37 @@ app.use(express.urlencoded({extended:true}));
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 //const PORT = process.env.PORT || 8080
-const args = Yargs(process.argv.slice(2)).default({port:8080}).argv
+const args = Yargs(process.argv.slice(2)).default({port:8000,modo:"fork"}).argv
 const PORT=args.port;
 
-httpServer.listen(PORT,()=>{
-    console.log("Servidor Encendido en puerto "+ PORT)
-})
+//const PORT=8080
 
+
+if (cluster.isPrimary && args.modo=="cluster") {
+  console.log(`Master ${process.pid} is running`);
+  for (let i = 0; i < numCPUs.cpus().length; i++) {
+    cluster.fork();
+  }
+  cluster.on('exit', (worker, code, signal) => {
+    cluster.fork();
+    console.log(`worker ${worker.process.pid} died`);
+  });
+} else {
+  httpServer.listen(PORT,()=>{
+    console.log("Servidor Encendido en puerto "+ PORT)
+  })
+  httpServer.on("error",(error)=>{console.log("Error en servidor")})
+  console.log(`Worker ${process.pid} started`);
+}
+
+/*
+httpServer.listen(PORT,()=>{
+  console.log("Servidor Encendido en puerto "+ PORT)
+})
 httpServer.on("error",(error)=>{console.log("Error en servidor")})
+*/
+
+
 
 app.use(function(req,res,next){
   req.session._garbage = Date();
@@ -118,3 +142,11 @@ app.get("/info",(req,res)=>{
 
 
 socket(io)
+
+
+
+
+
+
+
+
