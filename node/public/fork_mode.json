@@ -1,0 +1,15 @@
+{
+    "apps": [
+      {
+        "name": "server",
+        "script": "server.js",
+        "args": "--port 8080",
+        "instances": 1,
+        "exec_mode": "fork",
+        "autorestart": true,
+        "watch": true,
+        "ignore_watch" : ["node_modules", "dbmongo", ".git","public","chat.txt"],
+        "max_memory_restart": "1G"
+      }
+    ]
+  }
