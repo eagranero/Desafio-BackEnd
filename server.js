@@ -3,7 +3,6 @@ import { createServer, get } from "http";
 import { Server } from "socket.io";
 import {engine} from "express-handlebars"
 import { routerProductos,listadoProductos } from "./routers/productos.js";
-import { routerProductostest } from "./routers/productos-test.js";
 import {socket} from "./socket.js"
 import session from "express-session"
 import MongoStore from "connect-mongo";
@@ -114,7 +113,6 @@ app.use(function (req, res, next) {
 });
 
 app.use('/api/productos',routerProductos);
-app.use('/api/productos-test',routerProductostest);
 app.use('/api/randoms',randoms);
 app.use('/login',routerLogin);
 

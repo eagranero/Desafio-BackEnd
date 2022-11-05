@@ -1,6 +1,5 @@
 import { schema, normalize } from 'normalizr';
 import { listadoChat , listadoProductos } from './routers/productos.js';
-import { listadoProductosTest } from './routers/productos-test.js';
 
 const authorSchema = new schema.Entity("authors", {},{idAttribute:'mail'})
 const schemaMensaje = new schema.Entity("post", {author:authorSchema},{idAttribute:'id'})
@@ -16,7 +15,6 @@ export const socket=(io)=>{
         chat = await listadoChat.getAll();
 
         let date = new Date();
-        io.sockets.emit("listadoProductos-test", listadoProductosTest );
         io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
         const tiempo = "["+date.toLocaleDateString() + " - " + date.toLocaleTimeString()+"]";
         let nuevaConexion={author:{mail:"Nuevo",tiempo:tiempo,nombre:"",apellido:"",edad:"",alias:"",avatar:""},text: "Se unio al chat " + socket.id}

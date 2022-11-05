@@ -2,3 +2,4 @@
 {"level":"warn","message":"GET /loginss"}
 {"level":"warn","message":"GET /api/productoss"}
 {"level":"warn","message":"GET /favicon.ico"}
+{"level":"warn","message":"GET /api/productos-test"}
