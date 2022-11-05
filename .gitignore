@@ -1,3 +1,2 @@
-# dependencies
-node/public/node_modules
-node/public/dbmongo
+node_modules
+dbmongo
