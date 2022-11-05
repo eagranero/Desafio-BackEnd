@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node benchmark.js",
-    "start": "0x server.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
