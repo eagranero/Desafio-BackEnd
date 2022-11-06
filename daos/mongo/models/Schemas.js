@@ -8,4 +8,13 @@ export const SchemaUsuario = new Schema({
 
 });
 
+export const SchemaProducto = new Schema({
+  
+  timeStamp: { type: String, required: true, max: 100 },
+  nombre: { type: String, required: true },
+  precio: { type: Number, required: true },
+  thumbnail: { type: String, required: true }
+
+});
+
 

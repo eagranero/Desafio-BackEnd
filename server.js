@@ -32,6 +32,12 @@ dotenv.config()
     await listadoProductos.save_Knex({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"});
 })()*/
 
+const asincronica=(async()=>{
+  await listadoProductos.deleteAll()
+  await listadoProductos.save({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
+  await listadoProductos.save({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"})
+  await listadoProductos.save({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"})
+})()
 
 
 

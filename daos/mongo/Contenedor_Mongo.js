@@ -5,7 +5,8 @@ import logger from '../../utils/logger.js';
 
 export const connectMG = async(nombre)=>{
     try {
-        return await connect('mongodb://localhost:27017/'+nombre, { useNewUrlParser: true });
+        return await connect("mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net/?retryWrites=true&w=majority")
+        //return await connect('mongodb://localhost:27017/'+nombre, { useNewUrlParser: true });
       } catch (e) {
         console.log(e);
       }

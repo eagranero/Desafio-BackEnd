@@ -1,10 +1,13 @@
 import express, { json } from "express";
-import DB from "../daos/sql/DB.js";
+//import DB from "../daos/sql/DB.js";
 import Contenedor_FS from "../daos/fs/Contenedor_FS.js";
-import {options as MDB}  from "../options/optionsMDB.js"
+//import {options as MDB}  from "../options/optionsMDB.js"
+import { SchemaProducto } from "../daos/mongo/models/Schemas.js";
+import { DaosProductoMongo } from "../daos/daosProducto.js";
 
 
-export const listadoProductos =  new DB("Productos",MDB);
+//export const listadoProductos =  new DB("Productos",MDB);
+export const listadoProductos =  new DaosProductoMongo("productos",SchemaProducto)
 export const listadoChat= new Contenedor_FS("chat")
 export const routerProductos = express.Router()
 

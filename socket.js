@@ -15,7 +15,9 @@ export const socket=(io)=>{
         chat = await listadoChat.getAll();
 
         let date = new Date();
-        io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
+        //io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
+        io.sockets.emit("listadoProductos", await listadoProductos.getAll());
+
         const tiempo = "["+date.toLocaleDateString() + " - " + date.toLocaleTimeString()+"]";
         let nuevaConexion={author:{mail:"Nuevo",tiempo:tiempo,nombre:"",apellido:"",edad:"",alias:"",avatar:""},text: "Se unio al chat " + socket.id}
         chat.push(nuevaConexion)
@@ -36,8 +38,10 @@ export const socket=(io)=>{
 
         socket.on("nuevoProducto",async (data) => {
             console.log(data);
-            await listadoProductos.save_Knex(data) //agrego producto al archivo
-            io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
+            await listadoProductos.save(data) //agrego producto al archivo
+            io.sockets.emit("listadoProductos", await listadoProductos.getAll());
+            //await listadoProductos.save_Knex(data) //agrego producto al archivo
+            //io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
         });
     });
 
