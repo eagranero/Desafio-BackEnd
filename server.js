@@ -2,7 +2,6 @@ import express from "express";
 import { createServer, get } from "http";
 import { Server } from "socket.io";
 import {engine} from "express-handlebars"
-import { routerProductos,listadoProductos } from "./routers/productos.js";
 import {socket} from "./socket.js"
 import session from "express-session"
 import MongoStore from "connect-mongo";
@@ -15,22 +14,11 @@ import cluster from "cluster";
 import numCPUs from "os"
 import compression from "compression"
 import logger from "./utils/logger.js"
+import { routerProductos } from "./routers/productos.js";
+import { listadoProductos } from "./persistencia/productos_persistencia.js";
 
-
-
-//logger.info("algo")
 
 dotenv.config()
-
-//Cargo 3 productos de prueba
-/*const asincronica=(async()=>{
-    listadoProductos.crearDBProductos();
-    await listadoProductos.deleteAll()
-    //await listadoChat.deleteAll()
-    await listadoProductos.save_Knex({nombre:"Escuadra", precio:123.45, thumbnail:"../img/escuadra.jpg"})
-    await listadoProductos.save_Knex({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"});
-    await listadoProductos.save_Knex({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"});
-})()*/
 
 const asincronica=(async()=>{
   await listadoProductos.deleteAll()
@@ -38,8 +26,6 @@ const asincronica=(async()=>{
   await listadoProductos.save({nombre:"Calculadora", precio:123.45, thumbnail:"../img/calculadora.jpg"})
   await listadoProductos.save({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"})
 })()
-
-
 
 //Inicio Servidor Express
 const app = express();
@@ -84,10 +70,6 @@ const httpServer = createServer(app);
 const io = new Server(httpServer);
 const PORT = process.env.PORT || 8080
 const args = Yargs(process.argv.slice(2)).default({port:8000,modo:"fork"}).argv
-//const PORT=args.port; s
-
-//const PORT=8080
-
 
 if (cluster.isPrimary && args.modo=="cluster") {
   console.log(`Master ${process.pid} is running`);
@@ -113,14 +95,17 @@ app.use(function(req,res,next){
   next()
 })
 
+
 app.use(function (req, res, next) {
   logger.info(req.method + " " + req.url);
   next();
 });
 
+
 app.use('/api/productos',routerProductos);
 app.use('/api/randoms',randoms);
 app.use('/login',routerLogin);
+
 
 app.get('/', async (req, res) => {
   if (req.session.user) res.redirect("/login")
@@ -138,15 +123,12 @@ app.get("/info",(req,res)=>{
     Path:process.execPath,
     Carpeta: process.cwd()
   }
-  console.log(informacion)//esta es la linea que agrego
   res.json(informacion);
-  //res.send("asdasd".repeat(1000))
 })
+
 
 app.get('*', (req, res)=>{
   logger.warn(req.method + " " + req.url);
-  
-
   res.status(404).send('sitio no encotrado');
 });
 

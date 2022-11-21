@@ -1,5 +1,5 @@
 import { schema, normalize } from 'normalizr';
-import { listadoChat , listadoProductos } from './routers/productos.js';
+import { listadoChat, listadoProductos } from './persistencia/productos_persistencia.js';
 
 const authorSchema = new schema.Entity("authors", {},{idAttribute:'mail'})
 const schemaMensaje = new schema.Entity("post", {author:authorSchema},{idAttribute:'id'})
