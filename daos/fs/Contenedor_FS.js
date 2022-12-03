@@ -15,7 +15,8 @@ export default class Contenedor_FS{
             contenido = fs.readFileSync(this.nombre,'utf-8') || [];
             let listadoParce = JSON.parse(contenido) || [];
             this.listado=listadoParce;
-            this.ultimoID=this.listado[this.listado.length-1].id;
+            this.ultimoID=this.listado[this.listado.length-1]._id;
+            //console.log(this.listado)
             return listadoParce
         }
         catch (err){
@@ -41,7 +42,7 @@ export default class Contenedor_FS{
         try{
             this.getAll()
             this.ultimoID++;
-            elemento.id=this.ultimoID;
+            elemento._id=this.ultimoID;
             this.listado.push(elemento);
             fs.writeFileSync(this.nombre,JSON.stringify(this.listado))
             return this.ultimoID;            
@@ -52,16 +53,16 @@ export default class Contenedor_FS{
     }
 
     //Funcion para mostrar la informacion de un producto segun el ID. Retorna el indice del listado
-    getByID(indicador){
+    getById(indicador){
         try{
             this.getAll()
             let indice=-1;
             for(let i=0;i<this.listado.length;i++){
-            if (this.listado[i].id==indicador){
+            if (this.listado[i]._id==indicador){
                 indice = i;
             }
             }
-            return indice;
+            return this.listado[indice];
         }
         catch{
             logger.error("No se pudo leer el archivo "+this.nombre)
@@ -75,7 +76,7 @@ export default class Contenedor_FS{
             this.getAll()
             let indiceBorrar=-1;
             for(let i=0;i<this.listado.length;i++){
-                if (this.listado[i].id==indicador)
+                if (this.listado[i]._id==indicador)
                 {
                     indiceBorrar=i;
                 }
@@ -119,7 +120,7 @@ export default class Contenedor_FS{
             let idEncontrado=-1;
             for(i=0; i<this.listado.length;++i)
             {
-                if (this.listado[i].id==idCarrito){
+                if (this.listado[i]._id==idCarrito){
                     idEncontrado=i;
                     break;
                 }
@@ -149,7 +150,7 @@ export default class Contenedor_FS{
             for(i=0; i<this.listado.length;++i)
             {
                 //Si lo encuentro lo guardo y salgo del for
-                if (this.listado[i].id==idCarrito){
+                if (this.listado[i]._id==idCarrito){
                     indiceCarritoEncontrado=i;
                     break;
                 }
@@ -158,7 +159,7 @@ export default class Contenedor_FS{
             if (indiceCarritoEncontrado>-1){
                 for(i=0; i<this.listado[indiceCarritoEncontrado].productos.length;++i){
                     //Si lo encuentro el dindice del producto lo guardo y salgo del for
-                    if (this.listado[indiceCarritoEncontrado].productos[i].id==idProducto){
+                    if (this.listado[indiceCarritoEncontrado].productos[i]._id==idProducto){
                         indiceProductoEncontrado=i;
                         break;
                     }

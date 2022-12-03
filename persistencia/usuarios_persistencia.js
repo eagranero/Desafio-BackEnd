@@ -1,6 +1,6 @@
 
-import { DaosUsuariosMongo } from "../daos/daosUsuarios.js";
-import { SchemaUsuario } from "../daos/mongo/models/Schemas.js";
+import config from "../config.js";
+import UsuariosFactoryDAO from "../daos/daosUsuarios.js";
 
+export const usuarios= new UsuariosFactoryDAO(config.TIPO_PERSISTENCIA,"usuarios")
 
-export const usuarios = new DaosUsuariosMongo("usuarios",SchemaUsuario)

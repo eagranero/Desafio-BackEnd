@@ -48,10 +48,13 @@ function enviar() {
 }
 
 function cargar(){
+    
     const nombre = document.getElementById("nombre").value;
     const precio = document.getElementById("precio").value;
     const thumbnail = document.getElementById("thumbnail").value;
-    socket.emit("nuevoProducto", {nombre,precio,thumbnail});
+    if(nombre!=""&&precio!=""&&thumbnail!=""){
+      socket.emit("nuevoProducto", {nombre,precio,thumbnail});
+    }else{alert("Todos los espacios deben estar completos")}
     return false;
 }
 

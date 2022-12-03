@@ -1,5 +1,6 @@
 import { schema, normalize } from 'normalizr';
-import { listadoChat, listadoProductos } from './persistencia/productos_persistencia.js';
+import { listadoChat } from './persistencia/chat_persistencia.js';
+import { listadoProductos } from './persistencia/productos_persistencia.js';
 
 const authorSchema = new schema.Entity("authors", {},{idAttribute:'mail'})
 const schemaMensaje = new schema.Entity("post", {author:authorSchema},{idAttribute:'id'})
@@ -40,8 +41,6 @@ export const socket=(io)=>{
             console.log(data);
             await listadoProductos.save(data) //agrego producto al archivo
             io.sockets.emit("listadoProductos", await listadoProductos.getAll());
-            //await listadoProductos.save_Knex(data) //agrego producto al archivo
-            //io.sockets.emit("listadoProductos", await listadoProductos.getAll_Knex());
         });
     });
 

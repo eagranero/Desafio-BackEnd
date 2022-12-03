@@ -1,13 +1,17 @@
+/*import dotenv from 'dotenv'
+import path from "path";
+dotenv.config({
+  path: path.resolve(process.cwd(), process.env.NODE_ENV + ".env"),
+});*/
+//console.log(process.env.TIPO_PERSISTENCIA)
 import express from "express";
-import { createServer, get } from "http";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import {engine} from "express-handlebars"
 import {socket} from "./socket.js"
 import session from "express-session"
 import MongoStore from "connect-mongo";
 import { routerLogin } from "./routers/login.js";
-import passport from "passport";
-import dotenv from 'dotenv'
 import Yargs from "yargs";
 import { randoms } from "./routers/randoms.js";
 import cluster from "cluster";
@@ -16,9 +20,9 @@ import compression from "compression"
 import logger from "./utils/logger.js"
 import { routerProductos } from "./routers/productos.js";
 import { listadoProductos } from "./persistencia/productos_persistencia.js";
-
-
-dotenv.config()
+import config from "./config.js";
+import passport from "passport";
+//dotenv.config()
 
 const asincronica=(async()=>{
   await listadoProductos.deleteAll()
@@ -30,22 +34,25 @@ const asincronica=(async()=>{
 //Inicio Servidor Express
 const app = express();
 app.use(compression())
+
 app.use(
   session({
     store: MongoStore.create({
-      mongoUrl: process.env.DATABASE_CONNECTION_STRING,
+      mongoUrl: config.DATABASE_CONNECTION_STRING,
       mongoOptions: {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       },
     }),
 
-    secret: process.env.SECRET_MONGO,
+    secret: config.SECRET_MONGO,
     cookie: {maxAge: 10000},
     resave: false,
     saveUninitialized: false,
   })
 );
+
+
 app.use(express.static('public'));
 app.set('view engine', 'hbs');
 app.set('views', './views');
@@ -68,7 +75,7 @@ app.use(express.urlencoded({extended:true}));
   
 const httpServer = createServer(app);
 const io = new Server(httpServer);
-const PORT = process.env.PORT || 8080
+const PORT = config.PORT || 8080
 const args = Yargs(process.argv.slice(2)).default({port:8000,modo:"fork"}).argv
 
 if (cluster.isPrimary && args.modo=="cluster") {

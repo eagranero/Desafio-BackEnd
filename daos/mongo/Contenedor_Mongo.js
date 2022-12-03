@@ -6,7 +6,6 @@ import logger from '../../utils/logger.js';
 export const connectMG = async(nombre)=>{
     try {
         return await connect("mongodb+srv://eduardo:123456a@cluster0.fbnxtxd.mongodb.net/?retryWrites=true&w=majority")
-        //return await connect('mongodb://localhost:27017/'+nombre, { useNewUrlParser: true });
       } catch (e) {
         console.log(e);
       }
@@ -32,8 +31,6 @@ export default class Contenedor_Mongo{
         try{
             let encontrado=await this.collectionElement.findOne(elemento);
             return encontrado
-            /*if (encontrado.length>0)return encontrado;
-            else return null*/ 
         }catch(e){
             logger.error("No se pudo obtener el dato buscado de Mongo")
             return (e)
