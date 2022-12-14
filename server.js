@@ -1,28 +1,10 @@
-/*import dotenv from 'dotenv'
-import path from "path";
-dotenv.config({
-  path: path.resolve(process.cwd(), process.env.NODE_ENV + ".env"),
-});*/
-//console.log(process.env.TIPO_PERSISTENCIA)
 import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import {engine} from "express-handlebars"
-import {socket} from "./socket.js"
-import session from "express-session"
-import MongoStore from "connect-mongo";
-import { routerLogin } from "./routers/login.js";
-import Yargs from "yargs";
-import { randoms } from "./routers/randoms.js";
-import cluster from "cluster";
-import numCPUs from "os"
-import compression from "compression"
-import logger from "./utils/logger.js"
-import { routerProductos } from "./routers/productos.js";
+import { graphqlHTTP } from "express-graphql";
+import { buildSchema } from "graphql";
+import crypto from "crypto";
+import cors from "cors";
 import { listadoProductos } from "./persistencia/productos_persistencia.js";
-import config from "./config.js";
-import passport from "passport";
-//dotenv.config()
+
 
 const asincronica=(async()=>{
   await listadoProductos.deleteAll()
@@ -31,120 +13,66 @@ const asincronica=(async()=>{
   await listadoProductos.save({nombre:"Cuaderno", precio:123.45, thumbnail:"../img/cuaderno.jpg"})
 })()
 
-//Inicio Servidor Express
-const app = express();
-app.use(compression())
-
-app.use(
-  session({
-    store: MongoStore.create({
-      mongoUrl: config.DATABASE_CONNECTION_STRING,
-      mongoOptions: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-    }),
-
-    secret: config.SECRET_MONGO,
-    cookie: {maxAge: 10000},
-    resave: false,
-    saveUninitialized: false,
-  })
-);
 
 
-app.use(express.static('public'));
-app.set('view engine', 'hbs');
-app.set('views', './views');
-app.engine(
-    'hbs',
-    engine({
-        extname: '.hbs',
-        defaultLayout: 'index.hbs',
-        layoutsDir: './views/layouts',
-        partialsDir: './views/partials',
-    })
-);
-
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(express.json())
-app.use(express.urlencoded({extended:true}));
-  
-  
-const httpServer = createServer(app);
-const io = new Server(httpServer);
-const PORT = config.PORT || 8080
-const args = Yargs(process.argv.slice(2)).default({port:8000,modo:"fork"}).argv
-
-if (cluster.isPrimary && args.modo=="cluster") {
-  console.log(`Master ${process.pid} is running`);
-  for (let i = 0; i < numCPUs.cpus().length; i++) {
-    cluster.fork();
+const schema = buildSchema(`
+  type Producto {
+    nombre: String,
+    precio: Int,
+    thumbnail: String
   }
-  cluster.on('exit', (worker, code, signal) => {
-    cluster.fork();
-    console.log(`worker ${worker.process.pid} died`);
-  });
-} else {
-  httpServer.listen(PORT,()=>{
-    console.log("Servidor Encendido en puerto "+ PORT)
-  })
-  httpServer.on("error",(error)=>{console.log("Error en servidor")})
-  console.log(`Worker ${process.pid} started`);
+  input ProductoInput {
+    nombre: String,
+    precio: Int,
+    thumbnail: String
+  }
+  type Query {
+    getProductos(campo: String, valor: String): [Producto]
+  }
+  type Mutation {
+    createProducto(datos: ProductoInput): Producto
+  }
+`);
+
+const createProducto = async ({datos})=>{
+  console.log({...datos})
+  await listadoProductos.save({...datos})
+  return {...datos}
+}
+
+const getProductos = async ()=>{
+  return listadoProductos.listado
 }
 
 
-app.use(function(req,res,next){
-  req.session._garbage = Date();
-  req.session.touch();
-  next()
-})
-
-
-app.use(function (req, res, next) {
-  logger.info(req.method + " " + req.url);
-  next();
-});
-
-
-app.use('/api/productos',routerProductos);
-app.use('/api/randoms',randoms);
-app.use('/login',routerLogin);
-
-
-app.get('/', async (req, res) => {
-  if (req.session.user) res.redirect("/login")
-  else res.redirect("/login")
-});
-
-
-app.get("/info",(req,res)=>{
-  const informacion = {
-    Argumentos: args,
-    Plataforma: process.platform,
-    ID: process.pid,
-    Version: process.version,
-    Memoria:process.memoryUsage(),
-    Path:process.execPath,
-    Carpeta: process.cwd()
+class Producto {
+  constructor({ nombre, precio, thumbnail }) {
+    this.nombre = nombre;
+    this.precio = precio;
+    this.thumbnail = thumbnail;
   }
-  res.json(informacion);
-})
+}
 
 
-app.get('*', (req, res)=>{
-  logger.warn(req.method + " " + req.url);
-  res.status(404).send('sitio no encotrado');
+const app = express();
+
+app.use(cors());
+app.use(express.static("public"));
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    rootValue: {
+      getProductos,
+      createProducto,
+    },
+    graphiql: true,
+  })
+);
+
+const PORT = 8080;
+app.listen(PORT, () => {
+  const msg = `Servidor corriendo en puerto: ${PORT}`;
+  console.log(msg);
 });
-
-socket(io)
-
-
-
-
-
-
-
-
