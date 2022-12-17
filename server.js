@@ -14,34 +14,46 @@ const asincronica=(async()=>{
 })()
 
 
-
 const schema = buildSchema(`
   type Producto {
+    _id: String
     nombre: String,
-    precio: Int,
+    precio: String,
     thumbnail: String
   }
   input ProductoInput {
     nombre: String,
-    precio: Int,
+    precio: String,
     thumbnail: String
   }
   type Query {
-    getProductos(campo: String, valor: String): [Producto]
+    getProductos(campo: String): [Producto]
   }
   type Mutation {
     createProducto(datos: ProductoInput): Producto
+    deleteProducto(id: String):String
+    updateProducto(id: String, datos: ProductoInput): Producto
   }
 `);
 
 const createProducto = async ({datos})=>{
-  console.log({...datos})
   await listadoProductos.save({...datos})
   return {...datos}
 }
 
 const getProductos = async ()=>{
   return listadoProductos.listado
+}
+
+const deleteProducto = async (datos)=>{
+  await listadoProductos.deleteByID(parseInt(datos.id))
+  return "Producto Eliminado"
+}
+
+const updateProducto = async ({id,datos})=>{
+  //await listadoProductos.save({...datos})
+  await listadoProductos.updateById(id,datos)
+  return await await listadoProductos.getById(parseInt(id))
 }
 
 
@@ -66,6 +78,8 @@ app.use(
     rootValue: {
       getProductos,
       createProducto,
+      deleteProducto,
+      updateProducto
     },
     graphiql: true,
   })

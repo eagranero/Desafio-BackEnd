@@ -110,6 +110,30 @@ export default class Contenedor_FS{
         }
     }
 
+    //Funcion para actualizar producto
+    updateById(indicador,datos){
+        try{
+            this.getAll()
+            let indice=-1;
+            for(let i=0;i<this.listado.length;i++){
+            if (this.listado[i]._id==indicador){
+                indice = i;
+                this.listado[i].nombre=datos.nombre
+                this.listado[i].precio=datos.precio
+                this.listado[i].thumbnail=datos.thumbnail
+                this.saveModificado()
+                break
+            }
+            }
+            if (indice!=-1) logger.info("Elemento actualzado")
+            else logger.info("Elemento no encontrado")
+            return indice;
+
+        }catch{
+            logger.error("No se pudo actualizar el elemento "+this.nombre)
+        }
+    }
+
 
 
     agregarAlCarrito(idCarrito,producto)
